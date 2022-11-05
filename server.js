@@ -1,8 +1,9 @@
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser')
-const nodeRouter = require('./Routers/nodeRouter')
-const relationRouter = require('./Routers/relationRouter')
+const bodyParser = require('body-parser');
+const nodeRouter = require('./Routers/nodeRouter');
+const relationRouter = require('./Routers/relationRouter');
+const path = require('path');
 
 const app = express();
 app.use(cors());
@@ -15,6 +16,10 @@ app.get('/', function (req, res) {
 
 app.use('/fb-clone/node', nodeRouter);
 app.use('/fb-clone/relation', relationRouter);
+
+
+app.use(express.static('public')); 
+app.use('/images', express.static('images'));
 
 app.listen(port, function () {
   console.log(`Example app listening on port ${port}!`);

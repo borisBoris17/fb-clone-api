@@ -10,7 +10,17 @@ router.get('/', function (request, response) {
     }
     response.status(200).json(results.rows)
   });
-})
+});
+
+router.get('/:id', function (request, response) {
+  const nodeId = parseInt(request.params.id);
+  db.getNodeById(nodeId, (error, results) => {
+    if (error) {
+      throw error
+    }
+    response.status(200).json(results.rows)
+  });
+});
 
 router.post('/', async function (request, response) {
   const { node_type, content } = request.body;
@@ -49,6 +59,19 @@ router.delete('/:id', function (request, response) {
       throw error;
     }
     response.status(200).send();
+  });
+});
+
+router.get('/:sourceId/:relationType/:nodeType', function (request, response) {
+  const sourceId = parseInt(request.params.sourceId);
+  const relationType = request.params.relationType;
+  const nodeType = request.params.nodeType;
+
+  db.findNodesBySourceAndTypes(sourceId, relationType, nodeType, (error, results) => {
+    if (error) {
+      throw error;
+    }
+    response.status(200).send(results.rows);
   });
 });
 

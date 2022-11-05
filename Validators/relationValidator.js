@@ -6,11 +6,11 @@ const validateCreateRelation = (relationType, sourceId, destId, content) => {
     if (sourceId === undefined || destId === undefined) {
       resolve("Source and Destination IDs must be defined.");
     } else {
-      const sourceNode = await db.getNodeById(sourceId);
+      const sourceNode = await db.getNodeByIdForValidation(sourceId);
       if (sourceNode === undefined) {
         resolve("Source ID does not exist.")
       }
-      const destinationNode = await db.getNodeById(destId);
+      const destinationNode = await db.getNodeByIdForValidation(destId);
       if (destinationNode === undefined) {
         resolve("Destination ID does not exist.")
       }

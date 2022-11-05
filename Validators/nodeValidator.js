@@ -1,4 +1,3 @@
-const { getNodeById } = require("../queries")
 const db = require('../queries');
 
 const validateProfile = (profileContent) => {
