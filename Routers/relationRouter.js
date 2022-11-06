@@ -52,4 +52,16 @@ router.delete('/:id', function (request, response) {
   });
 });
 
+router.get('/:sourceId/:relationType', function (request, response) {
+  const sourceId = parseInt(request.params.sourceId);
+  const relationType = request.params.relationType;
+
+  db.getCountForRelationFromSource(sourceId, relationType, (error, results) => {
+    if (error) {
+      throw error;
+    }
+    response.status(200).send(results.rows);
+  });
+});
+
 module.exports = router;

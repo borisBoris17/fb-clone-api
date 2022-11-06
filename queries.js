@@ -91,6 +91,12 @@ const findNodesBySourceAndTypes = (sourceId, relationType, nodeType, callback) =
   });
 }
 
+const getCountForRelationFromSource = (sourceId, relationType, callback) => {
+  pool.query('SELECT NODE.* FROM relation JOIN NODE on dest_id = node_id WHERE source_id = $1 AND relation_type = $2', [sourceId, relationType], (error, results) => {
+    callback(error, results);
+  });
+}
+
 module.exports = {
   getAllNodes,
   createNode,
@@ -105,4 +111,5 @@ module.exports = {
   updateRelation,
   deleteRelation,
   findNodesBySourceAndTypes,
+  getCountForRelationFromSource,
 }
