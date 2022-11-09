@@ -67,6 +67,23 @@ const getRelationBySourceDestAndType = (relation_type, source_id, dest_id) => {
   });
 }
 
+const getNodeIdBySourceAndRelationType = (relation_type, source_id) => {
+  return new Promise(resolve => {
+    pool.query('SELECT node_id FROM node Join relation on dest_id = node_id WHERE relation_type = $1 AND source_id = $2', [relation_type, source_id], (error, results) => {
+      if (error) {
+        throw error
+      }
+      resolve(results.rows.map(row => row.node_id));
+    });
+  });
+}
+
+const getPostsByProfileIds = (profileIds, callback) => {
+  pool.query('select node.* from Node Join relation on dest_id = node_id where (source_id = ANY ($1) and node_type = \'Post\' and relation_type = \'Authored\')', [profileIds], (error, results) => {
+    callback(error, results);
+  });
+}
+
 const createRelation = (relation_type, source_id, dest_id, content, callback) => {
   pool.query('INSERT INTO relation (relation_type, source_id, dest_id, content) VALUES ($1, $2, $3, $4) returning *', [relation_type, source_id, dest_id, content], (error, results) => {
     callback(error, results);
@@ -112,4 +129,6 @@ module.exports = {
   deleteRelation,
   findNodesBySourceAndTypes,
   getCountForRelationFromSource,
+  getNodeIdBySourceAndRelationType,
+  getPostsByProfileIds
 }

@@ -75,4 +75,17 @@ router.get('/:sourceId/:relationType/:nodeType', function (request, response) {
   });
 });
 
+router.get('/feed/:profileId', async function (request, response) {
+  const profileId = parseInt(request.params.profileId);
+
+  const profileIds = await db.getNodeIdBySourceAndRelationType('Friend', profileId);
+  profileIds.push(profileId);
+  db.getPostsByProfileIds(profileIds, (error, results) => {
+    if (error) {
+      throw error;
+    }
+    response.status(200).send(results.rows);
+  });
+})
+
 module.exports = router;
