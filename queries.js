@@ -79,7 +79,7 @@ const getNodeIdBySourceAndRelationType = (relation_type, source_id) => {
 }
 
 const getPostsByProfileIds = (profileIds, callback) => {
-  pool.query('select node.* from Node Join relation on dest_id = node_id where (source_id = ANY ($1) and node_type = \'Post\' and relation_type = \'Authored\')', [profileIds], (error, results) => {
+  pool.query('select node.* from Node Join relation on dest_id = node_id where (source_id = ANY ($1) and node_type = \'Post\' and relation_type = \'Authored\') ORDER BY created_at desc', [profileIds], (error, results) => {
     callback(error, results);
   });
 }
