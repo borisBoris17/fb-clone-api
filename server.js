@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const nodeRouter = require('./Routers/nodeRouter');
+const accountRouter = require('./Routers/accountRouter');
 const relationRouter = require('./Routers/relationRouter');
 const path = require('path');
 
@@ -16,7 +17,7 @@ app.get('/', function (req, res) {
 
 app.use('/fb-clone/node', nodeRouter);
 app.use('/fb-clone/relation', relationRouter);
-
+app.use('/fb-clone/account', accountRouter);
 
 app.use(express.static('public')); 
 app.use('/images', express.static('images'));

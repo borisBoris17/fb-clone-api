@@ -34,6 +34,17 @@ const getProfileByEmail = (email) => {
   });
 }
 
+const getAccountByUsername = (username) => {
+  return new Promise(resolve => {
+    pool.query('SELECT * FROM account WHERE username = $1', [username], (error, results) => {
+      if (error) {
+        throw error
+      }
+      resolve(results.rows[0]);
+    });
+  });
+}
+
 const createNode = (node_type, content, callback) => {
   pool.query('INSERT INTO node (node_type, content) VALUES ($1, $2) returning *', [node_type, content], (error, results) => {
     callback(error, results);
@@ -114,6 +125,12 @@ const getCountForRelationFromSource = (sourceId, relationType, callback) => {
   });
 }
 
+const createAccount = (username, hashedPassword, callback) => {
+  pool.query('INSERT INTO account (username, password) VALUES ($1, $2) returning *', [username, hashedPassword], (error, results) => {
+    callback(error, results);
+  });
+}
+
 module.exports = {
   getAllNodes,
   createNode,
@@ -130,5 +147,7 @@ module.exports = {
   findNodesBySourceAndTypes,
   getCountForRelationFromSource,
   getNodeIdBySourceAndRelationType,
-  getPostsByProfileIds
+  getPostsByProfileIds,
+  getAccountByUsername,
+  createAccount
 }
