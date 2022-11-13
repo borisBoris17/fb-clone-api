@@ -45,9 +45,25 @@ const getAccountByUsername = (username) => {
   });
 }
 
-const createNode = (node_type, content, callback) => {
-  pool.query('INSERT INTO node (node_type, content) VALUES ($1, $2) returning *', [node_type, content], (error, results) => {
-    callback(error, results);
+const createProfile = (nodeType, content) => {
+  return new Promise((resolve, reject) => {
+    pool.query('INSERT INTO node (node_type, content) VALUES ($1, $2) returning *', [nodeType, content], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve(results.rows[0]);
+    });
+  });
+}
+
+const createNode = (node_type, content) => {
+  return new Promise((resolve, reject) => {
+    pool.query('INSERT INTO node (node_type, content) VALUES ($1, $2) returning *', [node_type, content], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve(results.rows[0]);
+    });
   });
 }
 
@@ -125,7 +141,17 @@ const getCountForRelationFromSource = (sourceId, relationType, callback) => {
   });
 }
 
-const createAccount = (username, hashedPassword, callback) => {
+const createAccount = (username, hashedPassword, profileId) => {
+  return new Promise((resolve, reject) => {
+    pool.query('INSERT INTO account (username, password, profile_node_id) VALUES ($1, $2, $3) returning *', [username, hashedPassword, profileId], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve(results.rows[0]);
+    });
+  });
+
+
   pool.query('INSERT INTO account (username, password) VALUES ($1, $2) returning *', [username, hashedPassword], (error, results) => {
     callback(error, results);
   });
@@ -149,5 +175,6 @@ module.exports = {
   getNodeIdBySourceAndRelationType,
   getPostsByProfileIds,
   getAccountByUsername,
-  createAccount
+  createAccount,
+  createProfile
 }

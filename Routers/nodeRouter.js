@@ -31,12 +31,15 @@ router.post('/', async function (request, response) {
     return;
   }
 
-  db.createNode(node_type, content, (error, results) => {
-    if (error) {
-      throw error;
-    }
-    response.status(201).send(results.rows[0]);
-  });
+  db.createNode(node_type, content)
+    .then(result => {
+      response.status(201).send(result);
+    })
+    .catch(error => {
+      if (error) {
+        throw error;
+      }
+    });
 });
 
 router.put('/:id', function (request, response) {
