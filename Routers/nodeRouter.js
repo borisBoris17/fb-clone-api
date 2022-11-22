@@ -3,6 +3,42 @@ const express = require('express');
 const router = express.Router();
 const nodeValidator = require('../Validators/nodeValidator');
 
+const multer = require('multer');
+const { compare } = require('bcrypt');
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './images/')
+  },
+  filename: function (req, file, cb) {
+    console.log(req.body);
+    console.log(req.body.postId);
+
+    cb(null, req.body.postId + "/" + req.body.postId + "/" + file.originalname)
+  }
+})
+
+const fileFilter = (req, file, callback) => {
+  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg' || file.mimetype === 'image/png') {
+    callback(null, true)
+  } else {
+    callback(null, false)
+  }
+}
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter
+});
+
+router.post('/uploadImage', upload.array('images', 12), (req, res, next) => {
+  if (req.files) {
+    res.status(200).json("Success");
+  } else {
+    res.status(200).json("File not found...");
+  }
+})
+
 router.get('/', function (request, response) {
   db.getAllNodes((error, results) => {
     if (error) {
