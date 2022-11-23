@@ -67,9 +67,14 @@ const createNode = (node_type, content) => {
   });
 }
 
-const updateNode = (content, nodeId, callback) => {
-  pool.query('UPDATE node SET content = $1 WHERE node_id = $2 returning *', [content, nodeId], (error, results) => {
-    callback(error, results);
+const updateNode = (content, nodeId) => {
+  return new Promise(resolve => {
+    pool.query('UPDATE node SET content = $1 WHERE node_id = $2 returning *', [content, nodeId], (error, results) => {
+      if (error) {
+        throw error
+      }
+      resolve(results.rows[0]);
+    });
   });
 }
 

@@ -2,19 +2,18 @@ const db = require('../queries');
 const express = require('express');
 const router = express.Router();
 const nodeValidator = require('../Validators/nodeValidator');
-
+const fs = require('fs');
+var path = require('path')
 const multer = require('multer');
-const { compare } = require('bcrypt');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, './images/')
+    const pathString = `./images/${req.body.profileId}/${req.body.postId}`
+    fs.mkdirSync(pathString, { recursive: true })
+    cb(null, pathString)
   },
   filename: function (req, file, cb) {
-    console.log(req.body);
-    console.log(req.body.postId);
-
-    cb(null, req.body.postId + "/" + req.body.postId + "/" + file.originalname)
+    cb(null, Date.now() + path.extname(file.originalname))
   }
 })
 
@@ -31,9 +30,15 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
-router.post('/uploadImage', upload.array('images', 12), (req, res, next) => {
+router.post('/uploadImage', upload.array('images', 12), async (req, res, next) => {
   if (req.files) {
-    res.status(200).json("Success");
+    const nodeId = parseInt(req.body.postId);
+    const profileId = parseInt(req.body.profileId);
+    const node = await db.getNodeByIdForValidation(nodeId);
+    const content = node.content;
+    content.images = req.files;
+    const updatedNode = await db.updateNode(content, nodeId);
+      res.status(200).json("Success");
   } else {
     res.status(200).json("File not found...");
   }
@@ -78,16 +83,19 @@ router.post('/', async function (request, response) {
     });
 });
 
-router.put('/:id', function (request, response) {
+router.put('/:id', async function (request, response) {
   const nodeId = parseInt(request.params.id);
   const { content } = request.body;
 
-  db.updateNode(content, nodeId, (error, results) => {
-    if (error) {
-      throw error;
-    }
-    response.status(204).send();
-  });
+  db.updateNode(content, nodeId)
+    .then(result => {
+      response.status(204).send(result);
+    })
+    .catch(error => {
+      if (error) {
+        throw error;
+      }
+    });
 });
 
 router.delete('/:id', function (request, response) {
