@@ -3,18 +3,18 @@ const config = require('./config');
 const pool = new Pool(config.db);
 
 const getAllNodes = (callback) => {
-  pool.query('SELECT * FROM public.node ORDER BY node_id ASC', (error, results) => { callback(error, results); });
+  pool.query('SELECT * FROM node ORDER BY node_id ASC', (error, results) => { callback(error, results); });
 }
 
 const getNodeById = (nodeId, callback) => {
-  pool.query('SELECT * FROM public.node WHERE node_id = $1', [nodeId], (error, results) => {
+  pool.query('SELECT * FROM node WHERE node_id = $1', [nodeId], (error, results) => {
     callback(error, results);
   });
 }
 
 const getNodeByIdForValidation = (nodeId) => {
   return new Promise(resolve => {
-    pool.query('SELECT * FROM public.node WHERE node_id = $1', [nodeId], (error, results) => {
+    pool.query('SELECT * FROM node WHERE node_id = $1', [nodeId], (error, results) => {
       if (error) {
         throw error
       }
@@ -25,7 +25,7 @@ const getNodeByIdForValidation = (nodeId) => {
 
 const getProfileByEmail = (email) => {
   return new Promise(resolve => {
-    pool.query(`SELECT * FROM public.node WHERE content @> \'{\"email\": \"${email}\"}\'`, (error, results) => {
+    pool.query(`SELECT * FROM node WHERE content @> \'{\"email\": \"${email}\"}\'`, (error, results) => {
       if (error) {
         throw error
       }
@@ -36,7 +36,7 @@ const getProfileByEmail = (email) => {
 
 const getAccountByUsername = (username) => {
   return new Promise(resolve => {
-    pool.query('SELECT * FROM public.account WHERE username = $1', [username], (error, results) => {
+    pool.query('SELECT * FROM account WHERE username = $1', [username], (error, results) => {
       if (error) {
         throw error
       }
@@ -47,7 +47,7 @@ const getAccountByUsername = (username) => {
 
 const createProfile = (nodeType, content) => {
   return new Promise((resolve, reject) => {
-    pool.query('INSERT INTO public.node (node_type, content) VALUES ($1, $2) returning *', [nodeType, content], (error, results) => {
+    pool.query('INSERT INTO node (node_type, content) VALUES ($1, $2) returning *', [nodeType, content], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -69,7 +69,7 @@ const createNode = (node_type, content) => {
 
 const updateNode = (content, nodeId) => {
   return new Promise(resolve => {
-    pool.query('UPDATE public.node SET content = $1 WHERE node_id = $2 returning *', [content, nodeId], (error, results) => {
+    pool.query('UPDATE node SET content = $1 WHERE node_id = $2 returning *', [content, nodeId], (error, results) => {
       if (error) {
         throw error
       }
@@ -79,18 +79,18 @@ const updateNode = (content, nodeId) => {
 }
 
 const deleteNode = (nodeId, callback) => {
-  pool.query('DELETE FROM public.node WHERE node_id = $1 returning *', [nodeId], (error, results) => {
+  pool.query('DELETE FROM node WHERE node_id = $1 returning *', [nodeId], (error, results) => {
     callback(error, results);
   });
 }
 
 const getAllRelations = (callback) => {
-  pool.query('SELECT * FROM public.relation ORDER BY relation_id ASC', (error, results) => { callback(error, results); });
+  pool.query('SELECT * FROM relation ORDER BY relation_id ASC', (error, results) => { callback(error, results); });
 }
 
 const getRelationBySourceDestAndType = (relation_type, source_id, dest_id) => {
   return new Promise(resolve => {
-    pool.query('SELECT * FROM public.relation WHERE relation_type = $1 AND source_id = $2 AND dest_id = $3', [relation_type, source_id, dest_id], (error, results) => {
+    pool.query('SELECT * FROM relation WHERE relation_type = $1 AND source_id = $2 AND dest_id = $3', [relation_type, source_id, dest_id], (error, results) => {
       if (error) {
         throw error
       }
@@ -101,7 +101,7 @@ const getRelationBySourceDestAndType = (relation_type, source_id, dest_id) => {
 
 const getNodeIdBySourceAndRelationType = (relation_type, source_id) => {
   return new Promise(resolve => {
-    pool.query('SELECT node_id FROM public.node Join public.relation on dest_id = node_id WHERE relation_type = $1 AND source_id = $2', [relation_type, source_id], (error, results) => {
+    pool.query('SELECT node_id FROM node Join relation on dest_id = node_id WHERE relation_type = $1 AND source_id = $2', [relation_type, source_id], (error, results) => {
       if (error) {
         throw error
       }
@@ -111,25 +111,25 @@ const getNodeIdBySourceAndRelationType = (relation_type, source_id) => {
 }
 
 const getPostsByProfileIds = (profileIds, callback) => {
-  pool.query('select node.* from public.Node Join relation on dest_id = node_id where (source_id = ANY ($1) and node_type = \'Post\' and relation_type = \'Authored\') ORDER BY created_at desc', [profileIds], (error, results) => {
+  pool.query('select node.* from Node Join relation on dest_id = node_id where (source_id = ANY ($1) and node_type = \'Post\' and relation_type = \'Authored\') ORDER BY created_at desc', [profileIds], (error, results) => {
     callback(error, results);
   });
 }
 
 const createRelation = (relation_type, source_id, dest_id, content, callback) => {
-  pool.query('INSERT INTO public.relation (relation_type, source_id, dest_id, content) VALUES ($1, $2, $3, $4) returning *', [relation_type, source_id, dest_id, content], (error, results) => {
+  pool.query('INSERT INTO relation (relation_type, source_id, dest_id, content) VALUES ($1, $2, $3, $4) returning *', [relation_type, source_id, dest_id, content], (error, results) => {
     callback(error, results);
   });
 }
 
 const updateRelation = (content, relationId, callback) => {
-  pool.query('UPDATE public.relation SET content = $1 WHERE relation_id = $2 returning *', [content, relationId], (error, results) => {
+  pool.query('UPDATE relation SET content = $1 WHERE relation_id = $2 returning *', [content, relationId], (error, results) => {
     callback(error, results);
   });
 }
 
 const deleteRelation = (relationId, callback) => {
-  pool.query('DELETE FROM public.relation WHERE relation_id = $1 returning *', [relationId], (error, results) => {
+  pool.query('DELETE FROM relation WHERE relation_id = $1 returning *', [relationId], (error, results) => {
     callback(error, results);
   });
 }
@@ -141,14 +141,14 @@ const findNodesBySourceAndTypes = (sourceId, relationType, nodeType, callback) =
 }
 
 const getCountForRelationFromSource = (sourceId, relationType, callback) => {
-  pool.query('SELECT NODE.* FROM public.relation JOIN public.NODE on dest_id = node_id WHERE source_id = $1 AND relation_type = $2', [sourceId, relationType], (error, results) => {
+  pool.query('SELECT NODE.* FROM relation JOIN NODE on dest_id = node_id WHERE source_id = $1 AND relation_type = $2', [sourceId, relationType], (error, results) => {
     callback(error, results);
   });
 }
 
 const createAccount = (username, hashedPassword, profileId) => {
   return new Promise((resolve, reject) => {
-    pool.query('INSERT INTO public.account (username, password, profile_node_id) VALUES ($1, $2, $3) returning *', [username, hashedPassword, profileId], (error, results) => {
+    pool.query('INSERT INTO account (username, password, profile_node_id) VALUES ($1, $2, $3) returning *', [username, hashedPassword, profileId], (error, results) => {
       if (error) {
         reject(error);
       }
