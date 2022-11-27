@@ -155,11 +155,6 @@ const createAccount = (username, hashedPassword, profileId) => {
       resolve(results.rows[0]);
     });
   });
-
-
-  pool.query('INSERT INTO account (username, password) VALUES ($1, $2) returning *', [username, hashedPassword], (error, results) => {
-    callback(error, results);
-  });
 }
 
 module.exports = {
