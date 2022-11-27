@@ -7,6 +7,7 @@ const getAllNodes = (callback) => {
 }
 
 const getNodeById = (nodeId, callback) => {
+  console.log(config.db);
   pool.query('SELECT * FROM node WHERE node_id = $1', [nodeId], (error, results) => {
     callback(error, results);
   });
