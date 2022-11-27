@@ -10,7 +10,6 @@ router.post('/register', async function (request, response) {
   const { username, password, email, name } = request.body;
 
   const savedAccount = await db.getAccountByUsername(username);
-  console.log(savedAccount);
   if (savedAccount != undefined) {
     response.status(200).json("Account with Username Already Exists.");
     return;
