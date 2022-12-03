@@ -1,7 +1,8 @@
 FROM node:alpine
+RUN mkdir -p /app
 WORKDIR /app
-COPY package.json ./
+COPY package.json /app
 RUN npm i
-COPY ./ ./
+COPY . /app
 EXPOSE 3002
-CMD ["npm", "run", "start"]
+CMD ["node", "server.js"]
