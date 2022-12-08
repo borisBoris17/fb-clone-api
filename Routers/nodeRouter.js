@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 })
 
 const fileFilter = (req, file, callback) => {
-  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg' || file.mimetype === 'image/png') {
+  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg' || file.mimetype === 'image/png' || image/heic) {
     callback(null, true)
   } else {
     callback(null, false)
@@ -89,7 +89,7 @@ router.put('/:id', async function (request, response) {
 
   db.updateNode(content, nodeId)
     .then(result => {
-      response.status(204).send(result);
+      response.status(200).json(result);
     })
     .catch(error => {
       if (error) {
