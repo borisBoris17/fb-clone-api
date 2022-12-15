@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 })
 
 const fileFilter = (req, file, callback) => {
-  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg' || file.mimetype === 'image/png' || image/heic) {
+  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg' || file.mimetype === 'image/png' || file.mimetype === 'image/heic') {
     callback(null, true)
   } else {
     callback(null, false)
@@ -38,7 +38,7 @@ router.post('/uploadImage', upload.array('images', 12), async (req, res, next) =
     const content = node.content;
     content.images = req.files;
     const updatedNode = await db.updateNode(content, nodeId);
-      res.status(200).json("Success");
+    res.status(200).json("Success");
   } else {
     res.status(200).json("File not found...");
   }
@@ -61,6 +61,16 @@ router.get('/:id', function (request, response) {
     }
     response.status(200).json(results.rows)
   });
+});
+
+router.get('/search/:keyword', async function (request, response) {
+  const keyword = request.params.keyword;
+  try {
+    const foundProfiles = await db.getProfileByKeyword(keyword);
+    response.status(200).json(foundProfiles);
+  } catch (error) {
+    throw error
+  }
 });
 
 router.post('/', async function (request, response) {
