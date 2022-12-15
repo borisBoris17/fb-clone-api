@@ -34,6 +34,17 @@ const getProfileByEmail = (email) => {
   });
 }
 
+const getProfileByKeyword = (keyword) => {
+  return new Promise(resolve => {
+    pool.query(`SELECT * FROM node WHERE content->>'name' like \'%${keyword}%\'`, (error, results) => {
+      if (error) {
+        throw error
+      }
+      resolve(results.rows);
+    });
+  });
+}
+
 const getAccountByUsername = (username) => {
   return new Promise(resolve => {
     pool.query('SELECT * FROM account WHERE username = $1', [username], (error, results) => {
@@ -176,5 +187,6 @@ module.exports = {
   getPostsByProfileIds,
   getAccountByUsername,
   createAccount,
-  createProfile
+  createProfile,
+  getProfileByKeyword
 }
