@@ -1,4 +1,5 @@
 const db = require('../queries');
+const emailUtil = require('../Utilities/emailUtility');
 const express = require('express');
 const router = express.Router();
 const nodeValidator = require('../Validators/nodeValidator');
@@ -34,7 +35,7 @@ router.post('/uploadImage', upload.array('images', 12), async (req, res, next) =
   if (req.files) {
     const nodeId = parseInt(req.body.postId);
     const profileId = parseInt(req.body.profileId);
-    const node = await db.getNodeByIdForValidation(nodeId);
+    const node = await db.getNodeById(nodeId);
     const content = node.content;
     content.images = req.files;
     const updatedNode = await db.updateNode(content, nodeId);
@@ -53,14 +54,20 @@ router.get('/', function (request, response) {
   });
 });
 
-router.get('/:id', function (request, response) {
+router.post('/sendNotification', async function (request, response) {
+  const { email } = request.body;
+  const emailSentMessage = await emailUtil.sendEmailNotification(email, 'Login and Create a Memory! https://memory-social.tucker-dev.com');
+  response.status(200).send(emailSentMessage);
+});
+
+router.get('/:id', async function (request, response) {
   const nodeId = parseInt(request.params.id);
-  db.getNodeById(nodeId, (error, results) => {
-    if (error) {
-      throw error
-    }
-    response.status(200).json(results.rows)
-  });
+  const node = await db.getNodeById(nodeId);
+  if (node) {
+    response.status(200).json(node);
+  } else {
+    response.status(200).json('No Node found.');
+  }
 });
 
 router.get('/search/:keyword', async function (request, response) {
@@ -143,6 +150,6 @@ router.get('/feed/:profileId', async function (request, response) {
     }
     response.status(200).send(results.rows);
   });
-})
+});
 
 module.exports = router;
