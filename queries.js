@@ -6,13 +6,7 @@ const getAllNodes = (callback) => {
   pool.query('SELECT * FROM node ORDER BY node_id ASC', (error, results) => { callback(error, results); });
 }
 
-const getNodeById = (nodeId, callback) => {
-  pool.query('SELECT * FROM node WHERE node_id = $1', [nodeId], (error, results) => {
-    callback(error, results);
-  });
-}
-
-const getNodeByIdForValidation = (nodeId) => {
+const getNodeById = (nodeId) => {
   return new Promise(resolve => {
     pool.query('SELECT * FROM node WHERE node_id = $1', [nodeId], (error, results) => {
       if (error) {
@@ -127,9 +121,14 @@ const getPostsByProfileIds = (profileIds, callback) => {
   });
 }
 
-const createRelation = (relation_type, source_id, dest_id, content, callback) => {
-  pool.query('INSERT INTO relation (relation_type, source_id, dest_id, content) VALUES ($1, $2, $3, $4) returning *', [relation_type, source_id, dest_id, content], (error, results) => {
-    callback(error, results);
+const createRelation = (relation_type, source_id, dest_id, content) => {  
+  return new Promise(resolve => {
+    pool.query('INSERT INTO relation (relation_type, source_id, dest_id, content) VALUES ($1, $2, $3, $4) returning *', [relation_type, source_id, dest_id, content], (error, results) => {
+      if (error) {
+        throw error;
+      }
+      resolve(results.rows[0]);
+    });
   });
 }
 
@@ -174,7 +173,6 @@ module.exports = {
   updateNode,
   deleteNode,
   getNodeById,
-  getNodeByIdForValidation,
   getProfileByEmail,
   getAllRelations,
   createRelation,
