@@ -132,9 +132,14 @@ const createRelation = (relation_type, source_id, dest_id, content) => {
   });
 }
 
-const updateRelation = (content, relationId, callback) => {
-  pool.query('UPDATE relation SET content = $1 WHERE relation_id = $2 returning *', [content, relationId], (error, results) => {
-    callback(error, results);
+const updateRelation = (content, relationId) => {
+  return new Promise(resolve => {
+    pool.query('UPDATE relation SET content = $1 WHERE relation_id = $2 returning *', [content, relationId], (error, results) => {
+      if (error) {
+        throw error;
+      }
+      resolve(results.rows[0]);
+    });
   });
 }
 
@@ -151,7 +156,7 @@ const findNodesBySourceAndTypes = (sourceId, relationType, nodeType, callback) =
 }
 
 const getCountForRelationFromSource = (sourceId, relationType, callback) => {
-  pool.query('SELECT NODE.* FROM relation JOIN NODE on dest_id = node_id WHERE source_id = $1 AND relation_type = $2', [sourceId, relationType], (error, results) => {
+  pool.query('SELECT DISTINCT NODE.* FROM relation JOIN NODE on dest_id = node_id WHERE source_id = $1 AND relation_type = $2', [sourceId, relationType], (error, results) => {
     callback(error, results);
   });
 }
