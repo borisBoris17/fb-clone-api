@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const relationValidator = require('../Validators/relationValidator');
 const emailUtil = require('../Utilities/emailUtility');
+const { response } = require('express');
 
 router.get('/', function (request, response) {
   db.getAllRelations((error, results) => {
@@ -30,16 +31,13 @@ router.post('/', async function (request, response) {
   response.status(201).send('Error Creating Relation');
 });
 
-router.put('/:id', function (request, response) {
+router.put('/:id', async function (request, response) {
   const relationId = parseInt(request.params.id);
   const { content } = request.body;
 
-  db.updateRelation(content, relationId, (error, results) => {
-    if (error) {
-      throw error;
-    }
-    response.status(204).send();
-  });
+  const updatedRelation = await db.updateRelation(content, relationId);
+
+  response.status(200).send(updatedRelation);
 });
 
 router.delete('/:id', function (request, response) {
@@ -78,6 +76,8 @@ router.post('/confirmFriendRequest', async function (request, response) {
   const { requestSourceId, requestTargetId, content } = request.body;
   const friendRequest = await db.getRelationBySourceDestAndType('Friend_request', requestSourceId, requestTargetId);
   if (friendRequest !== undefined) {
+    const updatedFriendRequestContent = {...friendRequest.content, isProcessed: true};
+    await db.updateRelation(updatedFriendRequestContent, friendRequest.relation_id);
     const createdRelations = [];
     createdRelations.push(await db.createRelation('Friend', requestSourceId, requestTargetId, content));
     createdRelations.push(await db.createRelation('Friend', requestTargetId, requestSourceId, content));
@@ -85,6 +85,14 @@ router.post('/confirmFriendRequest', async function (request, response) {
     return;
   } 
   response.status(200).send('No Friend Request Found.');
+});
+
+router.get('/getFriendRequest/:sourceId/:destId', async function (request, response) {
+  const sourceId = parseInt(request.params.sourceId);
+  const destId = parseInt(request.params.destId);
+
+  const friendRequest = await db.getRelationBySourceDestAndType('Friend_request', sourceId, destId);
+  response.status(200).send(friendRequest);
 });
 
 module.exports = router;
