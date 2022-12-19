@@ -63,6 +63,14 @@ router.get('/:sourceId/:relationType', function (request, response) {
   });
 });
 
+router.get('/getFriend/:sourceId/:destId', async function (request, response) {
+  const sourceId = parseInt(request.params.sourceId);
+  const destId = request.params.destId;
+
+  const friendRelation = await db.getRelationBySourceDestAndType('Friend', sourceId, destId);
+  response.status(200).send(friendRelation);
+});
+
 router.post('/sendFriendRequest', async function (request, response) {
   const { relation_type, source_id, dest_id, content } = request.body;
   await db.createRelation(relation_type, source_id, dest_id, content);
