@@ -9,9 +9,16 @@ const multer = require('multer');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const pathString = `./images/${req.body.profileId}/${req.body.postId}`
-    fs.mkdirSync(pathString, { recursive: true })
-    cb(null, pathString)
+    const { profileImageUpdate } = req.body;
+    if (profileImageUpdate) {
+      const pathString = `./images/${req.body.profileId}/profile`
+      fs.mkdirSync(pathString, { recursive: true })
+      cb(null, pathString)
+    } else {
+      const pathString = `./images/${req.body.profileId}/${req.body.postId}`
+      fs.mkdirSync(pathString, { recursive: true })
+      cb(null, pathString)
+    }
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname))
@@ -31,7 +38,7 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
-router.post('/uploadImage', upload.array('images', 12), async (req, res, next) => {
+router.post('/uploadImage', upload.single('images'), async (req, res, next) => {
   if (req.files) {
     const nodeId = parseInt(req.body.postId);
     const profileId = parseInt(req.body.profileId);
@@ -39,6 +46,18 @@ router.post('/uploadImage', upload.array('images', 12), async (req, res, next) =
     const content = node.content;
     content.images = req.files;
     const updatedNode = await db.updateNode(content, nodeId);
+    res.status(200).json("Success");
+  } else {
+    res.status(200).json("File not found...");
+  }
+})
+
+router.post('/uploadProfileImage', upload.array('image', 1), async (req, res, next) => {
+  if (req.files.length > 0) {
+    const profileId = parseInt(req.body.profileId);
+    const profileNode = await db.getNodeById(profileId);
+    const newContent = {...profileNode.content, profileImageName: req.files[0].filename};
+    const updatedNode = await db.updateNode(newContent, profileId);
     res.status(200).json("Success");
   } else {
     res.status(200).json("File not found...");
